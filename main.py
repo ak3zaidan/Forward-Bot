@@ -11,9 +11,7 @@ ProfileToUidMapping = {
         "Ahmed" : 912550670597488661,
     }
 
-# Add token here
 TOKEN = ""
-
 ValorSucessChannel = 1147380412629397585
 CyberSuccessChannel = 1156836773306048553
 AlpineSucessChannel = 1200723508368506983
@@ -21,6 +19,7 @@ MakeSuccessChannel = 1269784402712461382
 SwiftSuccessChannel = 1288267605647429692
 RefractSucessChannel = 1293669222026842164
 StellarSuccessChannel = 1288854903174729748
+AcoSuccessChannel = 1160270200998989844
 processedMessages = []
 
 intents = discord.Intents.default()
@@ -38,7 +37,7 @@ async def check_new_messages(channelDict):
                 current_time = datetime.datetime.now(datetime.timezone.utc)
                 time_difference = current_time - message.created_at
 
-                if time_difference.total_seconds() <= 30:
+                if time_difference.total_seconds() <= 45:
                     if message.id not in processedMessages:
                         getUid(message, value)
                         processedMessages.append(message.id)
@@ -374,7 +373,7 @@ async def sendMessage(uid, product, thumbnail_url, site, size, profile, orderLin
         embed = discord.Embed(
             title="Wealth ACO Success",
             description=description,
-            color=discord.Color.red()
+            color=0x791313
         )
 
         if thumbnail_url:
@@ -383,6 +382,33 @@ async def sendMessage(uid, product, thumbnail_url, site, size, profile, orderLin
         await user.send(embed=embed)
     else:
         print("User not found.")
+
+    await sendPublicMessage(product, thumbnail_url, site, size, profile, uid)
+
+async def sendPublicMessage(product, thumbnail_url, site, size, profile, uid):
+    valor = client.get_channel(AcoSuccessChannel)
+
+    description_parts = [
+        f"**Product**: {product}",
+        f"**Site**: {site}",
+        f"**Size**: {size}",
+        f"**Profile**: || {profile} ||"
+    ]
+
+    description = "\n".join(description_parts)
+
+    tag = f"<@{uid}>"
+
+    embed = discord.Embed(
+        title="Wealth ACO Success",
+        description=description,
+        color=0x791313
+    )
+
+    if thumbnail_url:
+        embed.set_thumbnail(url=thumbnail_url)
+
+    await valor.send(f"{tag}\n", embed=embed)
 
 @client.event
 async def on_ready():
