@@ -44,7 +44,7 @@ async def check_new_messages(channelDict):
 
                                 # EDIT DELAYS HERE
                                 
-            await asyncio.sleep(0.25 if FAST_REFRESH_MODE else 1.0)
+            await asyncio.sleep(0.5 if FAST_REFRESH_MODE else 1.0)
 
 
 
