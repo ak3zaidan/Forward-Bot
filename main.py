@@ -29,22 +29,24 @@ client = discord.Client(intents=intents)
 async def check_new_messages(channelDict):
     while True:
         for channel, value in channelDict.items():
+            try:
+                async for message in channel.history(limit=75 if FAST_REFRESH_MODE else 20):
 
-                                                # EDIT NUMBER OF MESSAGES TO FETCH
+                    current_time = datetime.datetime.now(datetime.timezone.utc)
+                    time_difference = current_time - message.created_at
 
-            async for message in channel.history(limit= 100 if FAST_REFRESH_MODE else 20):
+                    if time_difference.total_seconds() <= 45:
+                        if message.id not in processedMessages:
+                            getUid(message, value)
+                            processedMessages.append(message.id)
 
-                current_time = datetime.datetime.now(datetime.timezone.utc)
-                time_difference = current_time - message.created_at
+            except discord.errors.DiscordServerError:
+                print("Discord server error occurred. Retrying in a few seconds...")
+                await asyncio.sleep(15)
+            except Exception as e:
+                print(f"An unexpected error occurred: {e}")
 
-                if time_difference.total_seconds() <= 45:
-                    if message.id not in processedMessages:
-                        getUid(message, value)
-                        processedMessages.append(message.id)
-
-                                # EDIT DELAYS HERE
-                                
-            await asyncio.sleep(0.5 if FAST_REFRESH_MODE else 1.0)
+            await asyncio.sleep(0.5 if FAST_REFRESH_MODE else 1.5)
 
 
 
