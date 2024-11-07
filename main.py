@@ -93,22 +93,22 @@ def getUid(message, value):
             if embed.image and embed.image.url and (found_name := next((name for name in names if name.lower() in embed.image.url.lower()), None)):
                 break
 
-    if found_name:
-        uid = ProfileToUidMapping[found_name]
-        if value == 1:
-            handleValor(message, uid)
-        elif value == 2:
-            handleCyber(message, uid)
-        elif value == 3:
-            handleAlpine(message, uid)
-        elif value == 4:
-            handleMake(message, uid)
-        elif value == 5:
-            handleSwift(message, uid)
-        elif value == 6:
-            handleRefract(message, uid)
-        elif value == 7:
-            handleStellar(message, uid)
+    uid = ProfileToUidMapping[found_name] if found_name else None
+
+    if value == 1:
+        handleValor(message, uid)
+    elif value == 2:
+        handleCyber(message, uid)
+    elif value == 3:
+        handleAlpine(message, uid)
+    elif value == 4:
+        handleMake(message, uid)
+    elif value == 5:
+        handleSwift(message, uid)
+    elif value == 6:
+        handleRefract(message, uid)
+    elif value == 7:
+        handleStellar(message, uid)
 
 def handleValor(message, uid):
     product = image = site = size = profile = order = orderLink = ""
@@ -354,36 +354,38 @@ def handleStellar(message, uid):
         asyncio.create_task(sendMessage(uid, product, image, site, size, profile, orderLink, order))
 
 async def sendMessage(uid, product, thumbnail_url, site, size, profile, orderLink, order):
-    user = await client.fetch_user(uid)
     profile = profile.replace("|", "").strip()
 
-    if user is not None:
-        description_parts = [
-            f"**Product**: {product}",
-            f"**Site**: {site}",
-            f"**Size**: {size}",
-            f"**Profile**: {profile}"
-        ]
+    if uid is not None:
+        user = await client.fetch_user(uid)
 
-        if order or orderLink:
-            description_parts.append(
-                f"**Order**: [{order}]({orderLink})"
+        if user is not None:
+            description_parts = [
+                f"**Product**: {product}",
+                f"**Site**: {site}",
+                f"**Size**: {size}",
+                f"**Profile**: {profile}"
+            ]
+
+            if order or orderLink:
+                description_parts.append(
+                    f"**Order**: [{order}]({orderLink})"
+                )
+
+            description = "\n".join(description_parts)
+
+            embed = discord.Embed(
+                title="Wealth ACO Success",
+                description=description,
+                color=0x791313
             )
 
-        description = "\n".join(description_parts)
+            if thumbnail_url:
+                embed.set_thumbnail(url=thumbnail_url)
 
-        embed = discord.Embed(
-            title="Wealth ACO Success",
-            description=description,
-            color=0x791313
-        )
-
-        if thumbnail_url:
-            embed.set_thumbnail(url=thumbnail_url)
-
-        await user.send(embed=embed)
-    else:
-        print("User not found.")
+            await user.send(embed=embed)
+        else:
+            print("User not found.")
 
     await sendPublicMessage(product, thumbnail_url, site, size, profile, uid)
 
@@ -399,8 +401,6 @@ async def sendPublicMessage(product, thumbnail_url, site, size, profile, uid):
 
     description = "\n".join(description_parts)
 
-    tag = f"<@{uid}>"
-
     embed = discord.Embed(
         title="Wealth ACO Success",
         description=description,
@@ -410,7 +410,12 @@ async def sendPublicMessage(product, thumbnail_url, site, size, profile, uid):
     if thumbnail_url:
         embed.set_thumbnail(url=thumbnail_url)
 
-    await valor.send(f"{tag}\n", embed=embed)
+    if uid is not None:
+        tag = f"<@{uid}>"
+
+        await valor.send(f"{tag}\n", embed=embed)
+    else:
+        await valor.send(embed=embed)
 
 @client.event
 async def on_ready():
