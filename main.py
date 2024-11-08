@@ -61,6 +61,27 @@ async def check_new_messages(channelDict):
 # Mark: Ignore --------------------- ---------------------- ----------------------
 
 def getUid(message, value):
+        
+    def check_card_declined():
+        if "card decline" in message.content.lower():
+            return True
+        if message.embeds:
+            for embed in message.embeds:
+                if embed.title and "card decline" in embed.title.lower():
+                    return True
+                if embed.description and "card decline" in embed.description.lower():
+                    return True
+                for field in embed.fields:
+                    if field.name and "card decline" in field.name.lower():
+                        return True
+                if embed.footer and embed.footer.text and "card decline" in embed.footer.text.lower():
+                    return True
+        return False
+
+    # Return early if "card declined" is found
+    if check_card_declined():
+        return
+        
     names = set(ProfileToUidMapping.keys())
 
     message_content = message.content.lower()
