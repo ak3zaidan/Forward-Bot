@@ -253,7 +253,8 @@ def handleMake(message, uid):
                             product = product_name[1:].strip("[")
 
                     elif field_name == "size":
-                        size = field.value
+                        if not size:
+                            size = field.value
                     elif field_name == "profile name":
                         profile = field.value
                     elif field_name == "order":
